@@ -8,7 +8,7 @@ let storageRevision = null;
 // Function to persist the cashbook data to IndexedDB
 async function persistCashbook(balanceCents, startDate, records) {
     if (!storageReady || saving) {
-        alert("Please wait for loading or saving to finish.");
+        showFeedback("Please wait for loading or saving to finish.");
         return false;
     }
 
@@ -25,7 +25,7 @@ async function persistCashbook(balanceCents, startDate, records) {
         return true;
     } catch (error) {
         console.error("Save failed:", error);
-        alert(`Could not save: ${error.message} Your entry is still in the form.`);
+        showFeedback(`Could not save: ${error.message} Your entry is still in the form.`);
 
         return false;
     } finally {
@@ -63,7 +63,7 @@ function openCashbookDatabase() {
         };
 
         request.onblocked = function () {
-            alert("Close other Cashbook tabs, then reload this page.");
+            showFeedback("Close other Cashbook tabs, then reload this page.");
         };
     });
 }

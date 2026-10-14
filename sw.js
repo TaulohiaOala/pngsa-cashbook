@@ -1,10 +1,16 @@
 // Bump RELEASE whenever any cached file changes. Deploy the complete release together.
-const RELEASE = "v1";
+const RELEASE = "v3-ux-cache";
 const CACHE_PREFIX = `pngsa-shell:${self.registration.scope}:`;
 const CACHE_NAME = CACHE_PREFIX + RELEASE;
 const FILES = ["./", "index.html", "styles.css", "storage.js", "app.js", "reports.js",
-    "pwa.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
-const URLS = FILES.map(file => new URL(file, self.registration.scope).href);
+    "pwa.js", "ui.js", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"];
+// Keep this asset version in sync with index.html. Distinct URLs prevent an old
+// controller or HTTP cache from supplying a prior stylesheet to the new shell.
+const ASSET_VERSION = "3-ux-cache";
+const URLS = FILES.map(file => new URL(
+    /\.(js|css)$/.test(file) ? `${file}?v=${ASSET_VERSION}` : file,
+    self.registration.scope
+).href);
 
 self.addEventListener("install", event => {
     // Installation fails if any essential file cannot be fetched. Keep the old worker.

@@ -53,12 +53,12 @@ transactionForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     if (!storageReady || saving) {
-    alert("Please wait for loading or saving to finish.");
+    showFeedback("Please wait for loading or saving to finish.");
     return;
     }
 
     if (openingBalanceCents === null) {
-        alert("Set the opening balance before adding transactions.");
+        showFeedback("Set the opening balance before adding transactions.");
         return;
     }
 
@@ -82,22 +82,22 @@ transactionForm.addEventListener("submit", async function (event) {
         document.getElementById("transaction-reference").value.trim();
 
     if (!date || date < openingDate) {
-        alert("Choose a date on or after the opening balance date.");
+        showFeedback("Choose a date on or after the opening balance date.");
         return;
     }
 
     if (type !== "income" && type !== "expense") {
-        alert("Choose income or expense.");
+        showFeedback("Choose income or expense.");
         return;
     }
 
     if (amountCents === null || amountCents <= 0) {
-        alert("Enter a positive amount with no more than two decimal places.");
+        showFeedback("Enter a positive amount with no more than two decimal places.");
         return;
     }
 
     if (!category || !person || !description) {
-        alert("Complete the category, person, and description fields.");
+        showFeedback("Complete the category, person, and description fields.");
         return;
     }
 
@@ -133,7 +133,7 @@ const updatedTransactions = [...transactions, transaction];
     renderTransactions();
     transactionForm.reset();
 
-    alert("Transaction saved on this device.");
+    showFeedback("Transaction saved on this device.", true);
 });
 
 // selects backup button and message display
@@ -213,7 +213,8 @@ function parseAmountToCents(value) {
 // Function to display currency
 
 function formatMoney(cents) {
-    return `FJD ${centsToDecimal(cents)}`;
+    const [whole, fraction] = centsToDecimal(cents).split(".");
+    return `FJD ${whole.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}.${fraction}`;
 }
 
 function centsToDecimal(cents) {
@@ -306,14 +307,14 @@ for (const transaction of [...visibleTransactions].reverse()) {
             `${typeLabel}: ${sign}${formatMoney(transaction.amountCents)}`;
 
         const date = document.createElement("p");
-        date.textContent = `Date: ${transaction.date}`;
+        date.textContent = friendlyDate(transaction.date);
 
         const person = document.createElement("p");
         const personLabel = isIncome ? "Received from" : "Paid to";
         person.textContent = `${personLabel}: ${transaction.person}`;
 
         const category = document.createElement("p");
-        category.textContent = `Category: ${transaction.category}`;
+        category.textContent = transaction.category[0].toUpperCase() + transaction.category.slice(1);
 
         const reference = document.createElement("p");
         reference.textContent =
@@ -329,9 +330,17 @@ for (const transaction of [...visibleTransactions].reverse()) {
             const button = document.createElement("button");
             button.type = "button";
             button.textContent = "Void transaction";
+            button.setAttribute("aria-label", `Void transaction: ${transaction.description}, ${friendlyDate(transaction.date)}, ${formatMoney(transaction.amountCents)}`);
             button.addEventListener("click", () => openVoidForm(transaction.id));
             item.append(button);
         }
+        const templateButton = document.createElement("button");
+        templateButton.type = "button";
+        templateButton.className = "secondary template-button";
+        templateButton.textContent = "Use as template";
+        templateButton.setAttribute("aria-label", `Use as template: ${transaction.description}`);
+        templateButton.addEventListener("click", () => useTransactionTemplate(transaction));
+        item.append(templateButton);
         transactionList.append(item);
     }
 }
@@ -343,12 +352,12 @@ openingForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     if (!storageReady || saving) {
-        alert("Please wait for loading or saving to finish.");
+        showFeedback("Please wait for loading or saving to finish.");
         return;
     }
 
     if (transactions.length > 0) {
-        alert("The opening balance cannot be changed after adding transactions.");
+        showFeedback("The opening balance cannot be changed after adding transactions.");
         return;
     }
 
@@ -356,7 +365,7 @@ openingForm.addEventListener("submit", async function (event) {
     const startDate = openingDateInput.value;
 
     if (amountCents === null || !startDate) {
-        alert("Enter a starting date and a valid non-negative amount.");
+        showFeedback("Enter a starting date and a valid non-negative amount.");
         return;
     }
 
@@ -374,6 +383,7 @@ openingForm.addEventListener("submit", async function (event) {
     openingDate = startDate;
 
     updateSummary();
+    showFeedback("Opening balance saved on this device.", true);
 });
 
 renderTransactions();
@@ -414,11 +424,13 @@ async function initialiseStorage() {
         renderTransactions();
 
         storageReady = true;
+        document.dispatchEvent(new Event("cashbook-ready"));
 
         console.log("Cashbook loaded and ready.");
     } catch (error) {
         console.error("Loading failed:", error);
-        alert("Could not load the cashbook. Entries are blocked. Please reload.");
+        showFeedback("Could not load the cashbook. Entries are blocked. Please reload.");
+        document.dispatchEvent(new Event("cashbook-ready"));
     }
 }
 
@@ -474,6 +486,7 @@ downloadBackupButton.addEventListener("click", function () {
 
     backupMessage.textContent =
         "Backup download requested. Check that the file was saved.";
+    recordBackupRequest();
 });
 
 // Function to check file validity and restore cashbook data from a backup file
@@ -858,10 +871,12 @@ function openVoidForm(id) {
         `${record.date} — ${record.description} — ${formatMoney(record.amountCents)}`;
     voidMessage.textContent = "";
     voidForm.hidden = false;
+    if (!voidDialog.open) voidDialog.showModal();
     voidReason.focus();
 }
 
 function closeVoidForm() {
+    voidDialog.close();
     voidForm.hidden = true;
     voidTransactionId = null;
     voidForm.reset();
@@ -897,6 +912,11 @@ voidForm.addEventListener("submit", async event => {
     closeVoidForm();
     updateSummary();
     renderTransactions();
+    showFeedback("Transaction voided. Enter any correction as a new transaction.", true);
+    // The original trigger was replaced when history rendered.
+    const historyHeading = document.getElementById("history-heading");
+    historyHeading.tabIndex = -1;
+    historyHeading.focus({ preventScroll: true });
 });
 
 initialiseStorage();
