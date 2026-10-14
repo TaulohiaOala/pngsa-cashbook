@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PNGSA Cashbook</title>
+    <meta name="theme-color" content="#145a32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="PNGSA Cashbook">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="styles.css">
+    <script src="storage.js" defer></script>
+    <script src="app.js" defer></script>
+    <script src="reports.js" defer></script>
+    <script src="pwa.js" defer></script>
+</head>
+<body>
+    <header>
+    <h1>PNGSA Cashbook</h1>
+    </header>
+
+  <!--main cards-->
+<main>
+    <section id="offline-panel" aria-labelledby="offline-heading">
+        <h2 id="offline-heading">Use on this device</h2>
+        <p id="offline-status" role="status">Checking offline availability…</p>
+        <p id="update-status" role="status"></p>
+        <button id="check-updates" type="button">Check for app updates</button>
+        <details>
+            <summary>Install on an iPhone</summary>
+            <p>While online, open the published HTTPS address in Safari. Choose Share → Add to Home Screen and enable Open as Web App if shown. Open the new icon while still online and wait for “Offline ready” before entering or restoring records there.</p>
+            <p>Use this same icon for your main cashbook. Records do not sync to other browsers or devices. Keep regular JSON backups outside this device.</p>
+        </details>
+    </section>
+    <section aria-labelledby="summary-heading">
+        <h2 id="summary-heading">Cash summary</h2>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>Opening balance</h3>
+                <p id="opening-balance">Not set</p>
+            </div>
+
+            <div class="summary-card">
+                <h3>Total income</h3>
+                <p id="total-income">FJD 0.00</p>
+            </div>
+
+            <div class="summary-card">
+                <h3>Total expenses</h3>
+                <p id="total-expenses">FJD 0.00</p>
+            </div>
+
+            <div class="summary-card">
+                <h3>Expected cash balance</h3>
+                <p id="current-balance">Not set</p>
+            </div>
+        </div>
+    </section>
+
+
+<!--cash check form-->
+<section aria-labelledby="cash-check-heading">
+    <h2 id="cash-check-heading">Check cash on hand</h2>
+
+    <p>Count the physical cash, then enter the total below.</p>
+
+    <form id="cash-check-form">
+        <div class="form-field">
+            <label for="counted-cash">Counted cash (FJD)</label>
+            <input
+                type="number"
+                id="counted-cash"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                required
+            >
+        </div>
+
+        <button type="submit">Compare cash</button>
+    </form>
+
+    <p id="cash-check-result" role="status"></p>
+</section>
+
+
+
+
+<!--opening balance form-->
+
+    <section aria-labelledby="opening-heading">
+    <h2 id="opening-heading">Set opening balance</h2>
+
+    <form id="opening-form">
+        <div class="form-field">
+            <label for="opening-date">Starting date</label>
+            <input
+                type="date"
+                id="opening-date"
+                name="openingDate"
+                required
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="opening-amount">Cash on hand (FJD)</label>
+            <input
+                type="number"
+                id="opening-amount"
+                name="openingAmount"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+                placeholder="For example, 500.00"
+                required
+            >
+        </div>
+
+        <button type="submit">Save opening balance</button>
+    </form>
+</section>
+
+<!--transaction form-->
+
+<section aria-labelledby="transaction-heading">
+    <h2 id="transaction-heading">Add transaction</h2>
+
+    <form id="transaction-form">
+        <div class="form-field">
+            <label for="transaction-date">Date</label>
+            <input
+                type="date"
+                id="transaction-date"
+                name="transactionDate"
+                required
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="transaction-type">Transaction type</label>
+            <select id="transaction-type" name="transactionType" required>
+                <option value="">Choose a type</option>
+                <option value="income">Income — money received</option>
+                <option value="expense">Expense — money spent</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="transaction-amount">Amount (FJD)</label>
+            <input
+                type="number"
+                id="transaction-amount"
+                name="transactionAmount"
+                min="0.01"
+                step="0.01"
+                inputmode="decimal"
+                placeholder="For example, 25.00"
+                required
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="transaction-category">Category</label>
+            <select
+                id="transaction-category"
+                name="transactionCategory"
+                required
+            >
+                <option value="">Choose a category</option>
+                <option value="membership">Membership</option>
+                <option value="donations">Donations</option>
+                <option value="fundraising">Fundraising</option>
+                <option value="events">Events</option>
+                <option value="transport">Transport</option>
+                <option value="supplies">Supplies</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="transaction-person">Received from / paid to</label>
+            <input
+                type="text"
+                id="transaction-person"
+                name="transactionPerson"
+                maxlength="100"
+                placeholder="Person or organisation"
+                required
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="transaction-description">Description</label>
+            <input
+                type="text"
+                id="transaction-description"
+                name="transactionDescription"
+                maxlength="200"
+                placeholder="What was this payment for?"
+                required
+            >
+        </div>
+
+        <div class="form-field">
+            <label for="transaction-reference">
+                Receipt or reference number (optional)
+            </label>
+            <input
+                type="text"
+                id="transaction-reference"
+                name="transactionReference"
+                maxlength="100"
+            >
+        </div>
+
+        <button type="submit">Add transaction</button>
+    </form>
+</section>
+
+<!--transaction history-->
+
+<section aria-labelledby="history-heading">
+    <h2 id="history-heading">Transaction history</h2>
+
+    <div class="history-filters">
+    <div class="form-field">
+        <label for="filter-start">From date</label>
+        <input type="date" id="filter-start">
+    </div>
+
+    <div class="form-field">
+        <label for="filter-end">To date</label>
+        <input type="date" id="filter-end">
+    </div>
+
+    <div class="form-field">
+        <label for="filter-type">Show</label>
+        <select id="filter-type">
+            <option value="">All transactions</option>
+            <option value="income">Income only</option>
+            <option value="expense">Expenses only</option>
+        </select>
+    </div>
+</div>
+
+<button type="button" id="clear-filters">Clear filters</button>
+<div class="form-field">
+    <label for="filter-status">Transaction status</label>
+    <select id="filter-status">
+        <option value="">All records</option>
+        <option value="active">Active only</option>
+        <option value="voided">Voided only</option>
+    </select>
+</div>
+
+<form id="void-form" hidden aria-labelledby="void-heading">
+    <h3 id="void-heading">Void transaction</h3>
+    <p id="void-details"></p>
+    <p>The original stays visible but is excluded from totals. Enter any corrected transaction separately. This local history is not tamper-proof.</p>
+    <div class="form-field">
+        <label for="void-reason">Reason for voiding</label>
+        <input id="void-reason" type="text" maxlength="200" required>
+    </div>
+    <button type="submit">Confirm void</button>
+    <button id="cancel-void" type="button">Cancel</button>
+    <p id="void-message" role="status"></p>
+</form>
+
+<p id="filter-message" role="status"></p>
+
+
+<p id="report-message" role="status"></p>
+
+    <p>Most recently entered first.</p>
+
+    <p id="empty-history">No transactions recorded yet.</p>
+
+    <ul id="transaction-list" class="transaction-list"></ul>
+<br>
+    <!--export button-->
+    <button type="button" id="export-csv">
+        Download filtered transactions (CSV)
+    </button>
+
+</section>
+
+<!--backup section-->
+<section id="financial-report-section" aria-labelledby="financial-report-heading">
+    <div class="report-controls">
+        <h2 id="financial-report-heading">Financial report</h2>
+        <p>Choose an inclusive date range. History filters do not affect this report.</p>
+        <form id="financial-report-form">
+            <div class="form-field">
+                <label for="report-start">From date</label>
+                <input id="report-start" type="date" required>
+            </div>
+            <div class="form-field">
+                <label for="report-end">To date</label>
+                <input id="report-end" type="date" required>
+            </div>
+            <button type="submit">Preview report</button>
+            <button type="button" id="print-report">Print / Save as PDF</button>
+        </form>
+        <p id="financial-report-message" role="status"></p>
+        <p>To download a PDF, choose your browser or device’s PDF option in the print dialog.</p>
+    </div>
+    <p id="report-print-placeholder">Preview a valid financial report before printing.</p>
+    <article id="financial-report" hidden aria-label="Financial report preview"></article>
+</section>
+
+<section aria-labelledby="backup-heading">
+    <h2 id="backup-heading">Backup</h2>
+
+    <p>
+        Download a copy of all records and keep it somewhere safe,
+        outside this device.
+    </p>
+
+    <button type="button" id="download-backup">
+        Download backup
+    </button>
+
+    <p id="backup-message" role="status"></p>
+
+    <!--restore section-->
+<h3>Restore a backup</h3>
+
+<p>
+    Restoring replaces all records on this device.
+    Download your current backup first.
+</p>
+
+<form id="restore-form">
+    <div class="form-field">
+        <label for="restore-file">Choose a backup file</label>
+        <input
+            type="file"
+            id="restore-file"
+            accept=".json,application/json"
+            required
+        >
+    </div>
+
+    <button type="submit">Restore backup</button>
+</form>
+
+<p id="restore-message" role="status"></p>
+
+</section>
+</main>
+</body>
+</html>

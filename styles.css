@@ -1,0 +1,219 @@
+/*page defaults*/
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f4f5f7;
+    color: #202124;
+    line-height: 1.5;
+}
+
+header {
+    background-color: #202124;
+    color: #ffffff;
+    padding: 20px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/*styles the cards*/
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.summary-card {
+    min-width: 0;
+    background-color: #ffffff;
+    border: 1px solid #d8dde3;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.summary-card h3 {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: #4b5563;
+}
+
+.summary-card p {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+#current-balance {
+    color: #145a32;
+}
+
+
+/*adjusts the layout for larger screens*/
+
+@media (min-width: 600px) {
+    .summary-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 900px) {
+    .summary-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/*styling for openign balance form*/
+
+main > section + section {
+    margin-top: 32px;
+}
+
+form {
+    max-width: 480px;
+}
+
+.form-field {
+    margin-bottom: 16px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+input, 
+select {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #9ca3af;
+    border-radius: 8px;
+    font: inherit;
+    background-color: #ffffff;
+    color: inherit;
+}
+
+button {
+    min-height: 44px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #145a32;
+    color: #ffffff;
+    font: inherit;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+    outline: 3px solid #2563eb;
+    outline-offset: 3px;
+}
+
+/*styling for transaction list*/
+
+.transaction-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 16px;
+}
+
+.transaction-item {
+    background-color: #ffffff;
+    border: 1px solid #d8dde3;
+    border-radius: 12px;
+    padding: 16px;
+    overflow-wrap: anywhere;
+}
+
+.transaction-item h3 {
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+}
+
+.transaction-item p {
+    margin: 4px 0;
+}
+
+.transaction-amount {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.transaction-amount.income {
+    color: #145a32;
+}
+
+.transaction-amount.expense {
+    color: #a32121;
+}
+
+/*styling for history filters*/
+.transaction-item.voided {
+    border-left: 5px solid #666;
+    background: #eee;
+}
+
+#void-form {
+    padding: 16px;
+    border: 2px solid #a32121;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+button:disabled { opacity: 0.6; cursor: wait; }
+
+#financial-report { background: white; padding: 20px; margin-top: 16px; }
+.report-totals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.report-totals dt { font-weight: bold; }
+.report-totals dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.report-table-scroll { overflow-x: auto; }
+#financial-report table { width: 100%; border-collapse: collapse; min-width: 580px; table-layout: fixed; }
+#financial-report th, #financial-report td { border: 1px solid #aaa; padding: 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+#financial-report th:first-child { width: 18%; }
+#financial-report th:nth-child(2) { width: 42%; }
+#financial-report td p { margin: 4px 0; }
+
+@media print {
+    @page { size: A4; margin: 15mm; }
+    body { background: white; color: black; font-size: 10pt; }
+    body > header, main > section:not(#financial-report-section), .report-controls { display: none !important; }
+    main, #financial-report-section, #financial-report { margin: 0; padding: 0; max-width: none; }
+    .report-table-scroll { overflow: visible; }
+    #financial-report table { min-width: 0; }
+    #financial-report thead { display: table-header-group; }
+    #financial-report tr, .report-totals { break-inside: avoid; }
+    #financial-report h2, #financial-report h3 { break-after: avoid; }
+}
+
+.history-filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+@media (min-width: 600px) {
+    .history-filters {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
